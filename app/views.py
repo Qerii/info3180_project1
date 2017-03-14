@@ -52,54 +52,37 @@ def profile():
             filename = secure_filename(file.filename)
             file.save(os.path.join(file_folder, filename))
             
-            
-            
             user = UserProfile(file=filename,username = username,first_name = first_name,last_name=last_name, age = user_age, gender= user_gender, biography = user_info, date_created = date_created) 
             db.session.add(user)
             db.session.commit()
             return redirect(url_for('home'))
     return render_template('profile.html', form=form)
     
+
+
+@app.route('/profiles', methods=['GET', 'POST'])
+def profiles():
+    users = UserProfile.query.all()
+    if users is not None:
+        flash('profiles found', 'success')
+        return render_template('profiles.html', users = users)
+    flash('No profile found', 'warning')
+    return render_template('profiles.html')
     
-    
-    
-def timeinfo(entry):
-    day = time.strftime("%a")
-    date = time.strftime("%d")
-    if (date <10):
-        date = date.lstrip('0')
-    month = time.strftime("%b")
-    year = time.strftime("%Y")
-    return day + ", " + date + " " + month + " " + year
 
 
 @app.route('/profile/<userid>')
-def viewProfile(userid):
-    user = userProfile.query.filter_by(user_id = userid).first()
-    image = '/static/uploads/' + user.img
-    if request.method=='POST' or ('Content-Type' in request.headers and request.headers['Content-Type'] == 'application/json') and id!="":
-        return jsonify(
-            id=user.userid,
-            image=user.file,
-            username=user.username,
-            firstname=user.first_name,
-            lastname=user.last_name,
-            gender=user.gender,
-            age=user.age,
-            bio=user.biography,   
-            date=user.date_created)
-    else:
-        user = {'id':user.id,
-        'image':image,
-        'username':user.username,
-        'firstname':user.firstname,
-        'lastname':user.lastname,
-        'age':user.age,
-        'gender':user.gender,
-        'bio':user.bio,
-        'time':timeinfo(user.usertime)}
-    return render_template('viewProfile.html', user=user)  
-
+def user_profile(userid):
+    
+    user = UserProfile.query.filter_by( userid = userid).first()
+    file = '/static/uploads/' + user.file
+    if user is not None:
+       flash('user found', 'success') 
+       return render_template('user_profile.html', user = user, file=file)
+    flash('No profile found', 'warning')
+    return render_template('user_profile.html') 
+        
+    
 
 
 

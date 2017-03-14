@@ -1,3 +1,21 @@
 body {
     padding-top: 50px;
 }
+
+#pic{
+    float: left;
+    padding: 20px;
+   
+    
+}
+
+ #info{
+    float: left;
+}
+
+.prof{
+    border: solid ;
+    margin-top: 30px;
+    background-color: lightgrey;
+    width: 60%;
+}
