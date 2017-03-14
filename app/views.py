@@ -4,12 +4,15 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-
-from app import app, db, login_manager
-from flask import render_template, request, redirect, url_for, flash
+import os
+from app import app, db
+from flask import render_template, request, redirect, url_for, flash, session, abort, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
-from forms import LoginForm
 from models import UserProfile
+from werkzeug.utils import secure_filename
+from forms import ProfileForm
+import time
+from datetime import *
 
 
 ###
@@ -26,32 +29,83 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    form = LoginForm()
-    if request.method == "POST":
-        # change this to actually validate the entire form submission
-        # and not just one field
-        if form.username.data:
-            # Get the username and password values from the form.
 
-            # using your model, query database for a user based on the username
-            # and password submitted
-            # store the result of that query to a `user` variable so it can be
-            # passed to the login_user() method.
 
-            # get user id, load into session
-            login_user(user)
+    
+    
+#adding a profile
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    file_folder = "app/static/uploads" 
+    form = ProfileForm(request.form)
+    if request.method == 'POST':
+        username = request.form['username']
+        first_name = request.form['firstname']
+        last_name = request.form['lastname']
+        user_age = request.form['age']
+        user_gender = request.form['gender']
+        user_info = request.form['bio']
+        date_created = datetime.now()
+        file = request.files['file']
+        
+        if file:    
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(file_folder, filename))
+            
+            
+            
+            user = UserProfile(file=filename,username = username,first_name = first_name,last_name=last_name, age = user_age, gender= user_gender, biography = user_info, date_created = date_created) 
+            db.session.add(user)
+            db.session.commit()
+            return redirect(url_for('home'))
+    return render_template('profile.html', form=form)
+    
+    
+    
+    
+def timeinfo(entry):
+    day = time.strftime("%a")
+    date = time.strftime("%d")
+    if (date <10):
+        date = date.lstrip('0')
+    month = time.strftime("%b")
+    year = time.strftime("%Y")
+    return day + ", " + date + " " + month + " " + year
 
-            # remember to flash a message to the user
-            return redirect(url_for("home")) # they should be redirected to a secure-page route instead
-    return render_template("login.html", form=form)
 
-# user_loader callback. This callback is used to reload the user object from
-# the user ID stored in the session
-@login_manager.user_loader
-def load_user(id):
-    return UserProfile.query.get(int(id))
+@app.route('/profile/<userid>')
+def viewProfile(userid):
+    user = userProfile.query.filter_by(user_id = userid).first()
+    image = '/static/uploads/' + user.img
+    if request.method=='POST' or ('Content-Type' in request.headers and request.headers['Content-Type'] == 'application/json') and id!="":
+        return jsonify(
+            id=user.userid,
+            image=user.file,
+            username=user.username,
+            firstname=user.first_name,
+            lastname=user.last_name,
+            gender=user.gender,
+            age=user.age,
+            bio=user.biography,   
+            date=user.date_created)
+    else:
+        user = {'id':user.id,
+        'image':image,
+        'username':user.username,
+        'firstname':user.firstname,
+        'lastname':user.lastname,
+        'age':user.age,
+        'gender':user.gender,
+        'bio':user.bio,
+        'time':timeinfo(user.usertime)}
+    return render_template('viewProfile.html', user=user)  
+
+
+
+
+
+
+
 
 ###
 # The functions below should be applicable to all Flask apps.
