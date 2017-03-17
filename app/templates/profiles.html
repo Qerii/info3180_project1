@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+{% include 'flash_messages.html' %}
+
+<ul>
+    {% for user in users %}
+        <div class="container prof">
+             <br/> 
+     
+             <div id = "pic">
+                 <img src="{{ url_for('static', filename= 'uploads/' + user.file) }}" width="250px" height="250px">
+             </div> 
+    
+    
+            <div id="info">
+                <h1>{{ user['first_name'] }} {{ user['last_name'] }}</h1>
+                <br/>
+                <strong>Profile Created on:</strong> {{ user['date_created'] }}
+                <br/><br/>
+                <strong>Username:</strong> {{ user['username'] }}
+                <br/>
+                <strong>ID: </strong>{{ user['userid'] }}
+                <br/>
+                <strong>Gender:</strong> {{ user['gender'] }}
+                <br/>
+                <strong>Age:</strong> {{ user['age'] }}
+                <br/><br/>
+                <strong>Bio:</strong> {{user['biography'] }}
+            </div>
+    
+        </div>
+
+    {% endfor %}
+</ul>
+{% endblock %}
