@@ -64,6 +64,11 @@ def profile():
 def profiles():
     users = UserProfile.query.all()
     if users is not None:
+        if request.method == 'POST':
+            uList = []
+            for user in users:
+                uList.append({'Username':user.username, 'userid':user.userid})
+            return jsonify(users=uList)
         flash('profiles found', 'success')
         return render_template('profiles.html', users = users)
     flash('No profile found', 'warning')
@@ -73,12 +78,16 @@ def profiles():
 
 @app.route('/profile/<userid>')
 def user_profile(userid):
-    
     user = UserProfile.query.filter_by( userid = userid).first()
     file = '/static/uploads/' + user.file
     if user is not None:
-       flash('user found', 'success') 
-       return render_template('user_profile.html', user = user, file=file)
+        if request.method == 'POST':
+            uList = []
+            for user in users:
+                uList.append({'userid':user.userid,'Username':user.username, 'image': user.filename, 'gender':user.gender, 'age':user.age, 'profile_created_on':user.date_created })
+            return jsonify(users=uList)
+        flash('user found', 'success') 
+        return render_template('user_profile.html', user = user, file=file)
     flash('No profile found', 'warning')
     return render_template('user_profile.html') 
         
